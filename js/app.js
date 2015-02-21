@@ -1,4 +1,10 @@
 //////////////////////////////////////////////////
+// Preload "wasted" image
+//////////////////////////////////////////////////
+var image_wasted = new Image();
+image_wasted.src = "images/wasted.png";
+
+//////////////////////////////////////////////////
 // Define game board constants
 //////////////////////////////////////////////////
 
@@ -98,6 +104,9 @@ var Player = function(config) {
 
   // Set player's sprite
   this.sprite = "images/char-boy.png";
+  
+  // Stores our is_hit flag
+  this.is_hit = false;
 
   // Do initial reset (resets position, etc)
   this.reset();
@@ -106,7 +115,10 @@ var Player = function(config) {
 // Reset player's state
 Player.prototype.reset = function() {
 
-  // Move player to starting position (bottom row, 3rd column, center of block)
+  // Clear is_hit flag
+  this.is_hit = false;
+  
+ // Move player to starting position (bottom row, 3rd column, center of block)
   this.x = PIXEL_HOR_WALK_FIRST_COLUMN + (PIXEL_HOR_WALK_DIST * 2);
   this.y = PIXEL_VERT_WALK_FIRST_ROW + (PIXEL_VERT_WALK_DIST * 5);
   
@@ -126,6 +138,11 @@ Player.prototype.render = function() {
 // Handle user input
 Player.prototype.handleInput = function(key) {
 
+  // Only handle inputs if looping is enabled
+  if (Engine_loop == false) {
+    return;
+  }
+  
   // Handle keypresses
   switch (key) {
 
@@ -205,13 +222,36 @@ Player.prototype.handleInput = function(key) {
 // Handle character being hit
 Player.prototype.hit = function() {
   
-  // Hide game canvas
-  var img = new Image();
-  img.src = ctx.canvas.toDataURL();
-  ctx.canvas.style.display = "none";
-  document.getElementById("canvas_wasted").style.display = "";
-  document.getElementById("canvas_wasted").getContext("2d").drawImage(img,0,0);
-  player.reset();
+  // Are we already hit?  Don't do anything
+  //   - Prevents collision with two bugs causing this to run twice
+  if (player.is_hit == true) {
+    return;
+  }
+  
+  // Register that player is hit
+  player.is_hit = true;
+  
+  // Stop engine loop
+  Engine_loop = false;
+  
+  // Do "wasted" meme effect
+  setTimeout(function() {
+    
+    // Dim play field
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.fillRect(0, 50, 505, 536);
+    
+    // Show "wasted" image
+    setTimeout(function() {
+      ctx.drawImage(image_wasted,60,120);    
+      
+      // Reset playfield
+      setTimeout(function() {
+        Engine_loop = true;
+        player.reset();
+      }, 3000);
+    }, 1500);
+  }, 10);
 };
 
 // Now instantiate your objects.
