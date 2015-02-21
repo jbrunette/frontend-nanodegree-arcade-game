@@ -20,7 +20,7 @@ const PIXEL_HOR_WALK_DIST = 101;
 // The first column's horitontal walkable location
 const PIXEL_HOR_WALK_FIRST_COLUMN = 0;
 
-// Sprint width
+// Sprite width
 const SPRITE_WIDTH = 101;
 
 // Enemies our player must avoid
@@ -42,7 +42,7 @@ var Enemy = function(row) {
   // a helper we've provided to easily load images
   this.sprite = 'images/enemy-bug.png';
 
-  // Position bug in the requested row, out of site (left of canvas)
+  // Position bug in the requested row, left of canvas
   this.y = PIXEL_VERT_WALK_FIRST_ROW + Math.abs(PIXEL_VERT_WALK_DIST * (row - 1));
 
   // Reset bug
@@ -106,6 +106,7 @@ var Player = function(config) {
   this.sprite = "images/char-boy.png";
   
   // Stores our is_hit flag
+  //   - During hit processing, this will prevent a simultaneous collision with multiple enemies from causing hit processing to occur multiple times
   this.is_hit = false;
 
   // Do initial reset (resets position, etc)
@@ -118,7 +119,7 @@ Player.prototype.reset = function() {
   // Clear is_hit flag
   this.is_hit = false;
   
- // Move player to starting position (bottom row, 3rd column, center of block)
+  // Move player to starting position (bottom row, middle column)
   this.x = PIXEL_HOR_WALK_FIRST_COLUMN + (PIXEL_HOR_WALK_DIST * 2);
   this.y = PIXEL_VERT_WALK_FIRST_ROW + (PIXEL_VERT_WALK_DIST * 5);
   
@@ -254,11 +255,9 @@ Player.prototype.hit = function() {
   }, 10);
 };
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+// Create enemies and player objects
+//   - Enemy takes a row number as an argument
 var allEnemies = [new Enemy(2), new Enemy(3), new Enemy(4), new Enemy(2), new Enemy(3), new Enemy(4)];
-
 var player = new Player();
 
 // This listens for key presses and sends the keys to your
