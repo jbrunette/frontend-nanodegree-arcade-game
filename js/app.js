@@ -14,10 +14,14 @@ const PIXEL_HOR_WALK_DIST = 101;
 // The first column's horitontal walkable location
 const PIXEL_HOR_WALK_FIRST_COLUMN = 0;
 
+// Sprint width
+const SPRITE_WIDTH = 101;
+
 // Enemies our player must avoid
 var Enemy = function(row) {
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
+  
+  // Stores row we're on
+  this.row = row;
 
   // Whether or not we are moving, and the range of milliseconds before movement processing starts
   this.move = false;
@@ -52,7 +56,6 @@ Enemy.prototype.reset = function(dt) {
   // Randomize movement start time and start timer
   var that = this;
   var start_time = Math.random() * (this.move_start_max - this.move_start_min) + this.move_start_min;
-
   setTimeout(function() {
     that.move = true;
   }, start_time);
@@ -65,8 +68,17 @@ Enemy.prototype.update = function(dt) {
   // Move bug if we're doing position processing
   if (this.move == true) {
     this.x += this.speed * dt;
+    
+    /////////////////////////////////////////////////////////////
+    // Player collision detection
+    /////////////////////////////////////////////////////////////
+    
+    // If bug's sprite occupies the middle of the player's sprite and the bug is in the same row as the player, register a hit
+    if (this.x < (player.x + (SPRITE_WIDTH / 2)) && (this.x + SPRITE_WIDTH) > (player.x + (SPRITE_WIDTH / 2)) && this.row == player.row) {
+      player.hit();
+    }
 
-    // Is the bug off of the screen?  Reset bug;
+    // Is the bug off of the screen?  Reset bug
     if (this.x > ctx.canvas.width) {
       this.reset();
     }
@@ -78,15 +90,16 @@ Enemy.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// Player class
 var Player = function(config) {
+  
+  // Stores row we're on
+  this.row = 6;
 
   // Set player's sprite
   this.sprite = "images/char-boy.png";
 
-  // Do initial reset
+  // Do initial reset (resets position, etc)
   this.reset();
 };
 
@@ -96,6 +109,9 @@ Player.prototype.reset = function() {
   // Move player to starting position (bottom row, 3rd column, center of block)
   this.x = PIXEL_HOR_WALK_FIRST_COLUMN + (PIXEL_HOR_WALK_DIST * 2);
   this.y = PIXEL_VERT_WALK_FIRST_ROW + (PIXEL_VERT_WALK_DIST * 5);
+  
+  // Update our current row
+  this.row = 6;
 }
 
 // Update player's properties, etc
@@ -104,7 +120,6 @@ Player.prototype.update = function() {
 
 // Display character on the canvas
 Player.prototype.render = function() {
-  
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
@@ -136,6 +151,7 @@ Player.prototype.handleInput = function(key) {
 
       // Move character up
       this.y = new_y;
+      this.row--;
       break;
 
     // "down" - Move player down if possible
@@ -151,6 +167,7 @@ Player.prototype.handleInput = function(key) {
 
       // Move character down
       this.y = new_y;
+      this.row++;
       break;
 
     // "left" - Move player left if possible
@@ -183,8 +200,12 @@ Player.prototype.handleInput = function(key) {
       this.x = new_x
       break;
   }
-
 }
+
+// Handle character being hit
+Player.prototype.hit = function() {
+  player.reset();
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
