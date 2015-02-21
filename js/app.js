@@ -204,6 +204,13 @@ Player.prototype.handleInput = function(key) {
 
 // Handle character being hit
 Player.prototype.hit = function() {
+  
+  // Hide game canvas
+  var img = new Image();
+  img.src = ctx.canvas.toDataURL();
+  ctx.canvas.style.display = "none";
+  document.getElementById("canvas_wasted").style.display = "";
+  document.getElementById("canvas_wasted").getContext("2d").drawImage(img,0,0);
   player.reset();
 };
 
